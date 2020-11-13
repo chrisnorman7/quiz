@@ -1,5 +1,5 @@
 /// Provides the [QuestionsWidget] class.
-import 'package:audioplayer/audioplayer.dart';
+import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter/material.dart';
 
 import '../json/answer.dart';
@@ -31,12 +31,7 @@ class QuestionsWidgetState extends State<QuestionsWidget> {
   int _correct = 0;
   int _total = 0;
 
-  final AudioPlayer _audioPlayer = AudioPlayer();
-
-  final String _incorrectUrl =
-      'https://freesound.org/people/Beetlemuse/sounds/528956/download/528956__beetlemuse__wrong-answer-incorrect-error.wav';
-  final String _correctUrl =
-      'https://freesound.org/people/unadamlar/sounds/476178/download/476178__unadamlar__correct-choice.wav';
+  AudioCache _audioCache = AudioCache();
 
   @override
   Widget build(BuildContext context) {
@@ -99,24 +94,21 @@ class QuestionsWidgetState extends State<QuestionsWidget> {
     );
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _audioPlayer.stop();
-  }
-
   Future<void> loadQuestions() async {
     final QuestionList ql = await _factory.getQuestions(category: _category);
+    await _audioCache
+        .loadAll(<String>['sounds/correct.wav', 'sounds/incorrect.wav']);
+    print(_audioCache.loadedFiles);
     setState(() {
       _questions = ql.questions;
     });
   }
 
   Future<void> playCorrect() async {
-    await _audioPlayer.play(_correctUrl);
+    await _audioCache.play('sounds/correct.wav');
   }
 
   Future<void> playIncorrect() async {
-    await _audioPlayer.play(_incorrectUrl);
+    await _audioCache.play('sounds/incorrect.wav');
   }
 }
